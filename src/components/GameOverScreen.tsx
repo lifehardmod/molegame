@@ -73,7 +73,17 @@ export function GameOverScreen({
             </div>
 
             {/* 순위 */}
-            {!isLoading && myRank !== null && (
+            {isLoading ? (
+              <div className="flex-1 bg-neutral-50 rounded-2xl p-5 text-center border border-neutral-100">
+                <div className="text-xs text-neutral-400 font-medium uppercase tracking-wide mb-1">
+                  Rank
+                </div>
+                <div className="flex flex-col items-center gap-1.5 mt-2">
+                  <div className="h-9 w-16 bg-neutral-200 rounded-lg animate-pulse" />
+                  <div className="h-3 w-12 bg-neutral-200 rounded animate-pulse" />
+                </div>
+              </div>
+            ) : myRank !== null ? (
               <div className="flex-1 bg-neutral-50 rounded-2xl p-5 text-center border border-neutral-100">
                 <div className="text-xs text-neutral-400 font-medium uppercase tracking-wide mb-1">
                   Rank
@@ -85,7 +95,7 @@ export function GameOverScreen({
                   </span>
                 </div>
               </div>
-            )}
+            ) : null}
           </div>
         </div>
       </div>

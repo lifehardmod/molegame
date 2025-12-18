@@ -83,8 +83,22 @@ export function Leaderboard({ scores, isLoading, onClose }: LeaderboardProps) {
       {/* 리스트 */}
       <div className="flex-1 overflow-y-auto -mx-2 px-2">
         {showLoading ? (
-          <div className="text-center py-12 text-neutral-400">
-            불러오는 중...
+          <div className="space-y-1.5">
+            {[...Array(8)].map((_, i) => (
+              <div
+                key={i}
+                className="flex items-center justify-between px-4 py-3 rounded-xl bg-neutral-50 border border-neutral-100"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-6 bg-neutral-200 rounded animate-pulse" />
+                  <div className="w-24 h-5 bg-neutral-200 rounded animate-pulse" />
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-10 h-5 bg-neutral-200 rounded animate-pulse" />
+                  <div className="w-8 h-4 bg-neutral-200 rounded animate-pulse" />
+                </div>
+              </div>
+            ))}
           </div>
         ) : displayScores.length === 0 ? (
           <div className="text-center py-12 text-neutral-400">
