@@ -1,0 +1,83 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: "Pretendard";
+  src: url("/pretendard/Pretendard-Thin.woff2") format("woff2");
+  font-weight: 100;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Pretendard";
+  src: url("/pretendard/Pretendard-ExtraLight.woff2") format("woff2");
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Pretendard";
+  src: url("/pretendard/Pretendard-Light.woff2") format("woff2");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Pretendard";
+  src: url("/pretendard/Pretendard-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Pretendard";
+  src: url("/pretendard/Pretendard-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Pretendard";
+  src: url("/pretendard/Pretendard-SemiBold.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Pretendard";
+  src: url("/pretendard/Pretendard-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Pretendard";
+  src: url("/pretendard/Pretendard-ExtraBold.woff2") format("woff2");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Pretendard";
+  src: url("/pretendard/Pretendard-Black.woff2") format("woff2");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+body {
+  font-family: "Pretendard", -apple-system, BlinkMacSystemFont, sans-serif;
+}
