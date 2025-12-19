@@ -6,9 +6,9 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-// 게임 상수
+// 게임 상수 (클라이언트와 동일하게 유지!)
 const GRID_COLS = 10;
-const GRID_ROWS = 18;
+const GRID_ROWS = 15;
 const GAME_TIME = 90;
 const MAX_STEPS = 500; // steps 배열 최대 크기
 
@@ -190,7 +190,7 @@ Deno.serve(async (req) => {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
-    }햣햣
+    }
 
     // clear_time 검증
     if (clear_time !== null) {

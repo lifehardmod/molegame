@@ -33,7 +33,7 @@ interface KakaoShareOptions {
 
 // 카카오 앱 키 (환경 변수에서 가져오기)
 const KAKAO_APP_KEY = import.meta.env.VITE_KAKAO_APP_KEY || "";
-const SITE_URL = "https://molegame-drab.vercel.app";
+const SITE_URL = "https://duduji.site";
 
 // 카카오 SDK 초기화
 export function initKakao(): boolean {
@@ -86,7 +86,7 @@ export function shareToKakao(score: number, rank: number | null): void {
     window.Kakao.Share.sendDefault({
       objectType: "feed",
       content: {
-        title: "두더지 게임 - 합이 10이 되도록!",
+        title: "🎮 두더지 게임 - 합이 10이 되도록!",
         description: description,
         imageUrl: `${SITE_URL}/Logo.webp`,
         link: {
@@ -96,7 +96,7 @@ export function shareToKakao(score: number, rank: number | null): void {
       },
       buttons: [
         {
-          title: "도전하기",
+          title: "나도 도전하기",
           link: {
             mobileWebUrl: SITE_URL,
             webUrl: SITE_URL,
