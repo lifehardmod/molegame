@@ -190,7 +190,7 @@ Deno.serve(async (req) => {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
-    }
+    }햣햣
 
     // clear_time 검증
     if (clear_time !== null) {

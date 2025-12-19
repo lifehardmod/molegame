@@ -1,4 +1,5 @@
 import { formatTime } from "../utils/gameLogic";
+import { shareToKakao } from "../utils/kakaoShare";
 
 interface GameOverScreenProps {
   score: number;
@@ -51,7 +52,8 @@ export function GameOverScreen({
           {isNewRecord && previousScore !== null && (
             <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4 text-center">
               <span className="text-amber-600 text-sm font-medium">
-                🎊 새 기록! 이전 점수 {previousScore}점에서 {score - previousScore}점 상승!
+                🎊 새 기록! 이전 점수 {previousScore}점에서{" "}
+                {score - previousScore}점 상승!
               </span>
             </div>
           )}
@@ -102,11 +104,24 @@ export function GameOverScreen({
 
       {/* 하단 버튼 */}
       <div className="w-full max-w-sm mx-auto space-y-3 mb-10">
+        {/* 카카오톡 공유 버튼 */}
+        <button
+          onClick={() => shareToKakao(score, myRank)}
+          className="w-full py-3 rounded-xl font-medium text-black text-sm
+              bg-[#FEE500] hover:bg-[#FDD800] active:scale-[0.98]
+              transition-all flex items-center justify-center gap-2"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 3C6.477 3 2 6.477 2 10.5c0 2.47 1.607 4.647 4.093 5.903-.17.616-.63 2.235-.72 2.582-.11.43.157.424.331.308.137-.09 2.18-1.48 3.063-2.08.406.054.823.082 1.233.082 5.523 0 10-3.477 10-7.795C20 6.477 17.523 3 12 3z" />
+          </svg>
+          카카오톡으로 공유하기
+        </button>
+
         <div className="flex flex-row gap-3 w-full">
           <button
             onClick={onHome}
             className="w-full py-3 rounded-xl font-medium text-neutral-800 text-sm
-                bg-neutral-200 hover:bg-neutral-200 active:scale-[0.98]
+                bg-neutral-200 hover:bg-neutral-300 active:scale-[0.98]
                 transition-all"
           >
             처음으로
@@ -114,7 +129,7 @@ export function GameOverScreen({
           <button
             onClick={onShowLeaderboard}
             className="w-full py-3 rounded-xl font-medium text-neutral-800 text-sm
-                bg-neutral-200 hover:bg-neutral-200 active:scale-[0.98]
+                bg-neutral-200 hover:bg-neutral-300 active:scale-[0.98]
                 transition-all"
           >
             🏆 랭킹 보기
