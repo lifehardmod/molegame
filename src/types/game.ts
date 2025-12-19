@@ -18,7 +18,7 @@ export interface SelectedCells {
   sum: number;
 }
 
-export type GameState = "start" | "playing" | "gameover";
+export type GameState = "start" | "countdown" | "playing" | "gameover";
 
 export interface Score {
   id: string;

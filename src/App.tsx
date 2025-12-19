@@ -30,6 +30,7 @@ function App() {
     clearTime,
     maxScore,
     isStarting,
+    countdown,
     startGame,
     selectCells,
     clearSelection,
@@ -123,7 +124,7 @@ function App() {
         )}
 
         {screen === "game" && (
-          <div className="flex-1 flex flex-col py-2 overflow-hidden bg-neutral-50">
+          <div className="flex-1 flex flex-col py-2 overflow-hidden bg-neutral-50 relative">
             <div className="shrink-0">
               <GameHUD
                 score={score}
@@ -143,6 +144,23 @@ function App() {
                 enabled={gameState === "playing"}
               />
             </div>
+
+            {/* 카운트다운 오버레이 */}
+            {gameState === "countdown" && (
+              <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-50">
+                <div
+                  key={countdown}
+                  className="countdown-number text-[140px] font-bold text-white drop-shadow-lg"
+                  style={{
+                    fontFamily: "'Jua', sans-serif",
+                    textShadow:
+                      "0 0 40px rgba(251, 191, 36, 0.8), 0 0 80px rgba(251, 191, 36, 0.4)",
+                  }}
+                >
+                  {countdown}
+                </div>
+              </div>
+            )}
           </div>
         )}
 

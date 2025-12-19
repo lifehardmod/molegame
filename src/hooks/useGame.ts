@@ -19,8 +19,10 @@ export function useGame() {
   const [selectedCells, setSelectedCells] = useState<Cell[]>([]);
   const [clearTime, setClearTime] = useState<number | null>(null);
   const [isStarting, setIsStarting] = useState(false);
+  const [countdown, setCountdown] = useState<number>(0);
 
   const timerRef = useRef<number | null>(null);
+  const countdownRef = useRef<number | null>(null);
   const startTimeRef = useRef<number>(0);
 
   // 세션 정보
@@ -53,8 +55,10 @@ export function useGame() {
       setTimeLeft(GAME_TIME);
       setSelectedCells([]);
       setClearTime(null);
-      setGameState("playing");
-      startTimeRef.current = Date.now();
+      
+      // 카운트다운 시작
+      setCountdown(3);
+      setGameState("countdown");
     } catch (error) {
       console.error("Error starting game:", error);
     } finally {
@@ -177,7 +181,27 @@ export function useGame() {
     return false;
   }, [selectedCells, cells, getSelectionBox]);
 
-  // 타이머
+  // 카운트다운 타이머 (시작 시 한 번만 설정)
+  useEffect(() => {
+    if (gameState !== "countdown") return;
+
+    // 카운트다운 시작: 3 -> 2 -> 1 -> 시작
+    const timers: number[] = [];
+    
+    timers.push(window.setTimeout(() => setCountdown(2), 1000));
+    timers.push(window.setTimeout(() => setCountdown(1), 2000));
+    timers.push(window.setTimeout(() => {
+      setCountdown(0);
+      setGameState("playing");
+      startTimeRef.current = Date.now();
+    }, 3000));
+
+    return () => {
+      timers.forEach(t => clearTimeout(t));
+    };
+  }, [gameState]);
+
+  // 게임 타이머
   useEffect(() => {
     if (gameState === "playing") {
       timerRef.current = window.setInterval(() => {
@@ -220,6 +244,7 @@ export function useGame() {
     clearTime,
     maxScore: TOTAL_CELLS,
     isStarting,
+    countdown,
     startGame,
     resetBoard,
     selectCells,
