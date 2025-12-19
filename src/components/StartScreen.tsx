@@ -32,16 +32,27 @@ export function StartScreen({
     <div className="flex-1 flex flex-col items-center justify-center px-6 py-8 bg-white">
       {/* 로고 */}
       <div className="mb-6 rounded-2xl overflow-hidden">
-        <img src="/Logo.webp" alt="logo" className="w-full h-auto" />
+        <img
+          src="/Logo.webp"
+          alt="사과게임 두더지게임 로고"
+          className="w-full h-auto"
+        />
       </div>
       {/* 게임 설명 */}
       <div className="text-center mb-18 space-y-1">
+        <h1 className="sr-only">사과게임 두더지게임 - 무료 퍼즐 게임 플레이</h1>
+        <h2 className="text-neutral-800 text-lg font-bold mb-2">
+          사과게임 두더지게임
+        </h2>
         <p className="text-neutral-700 text-sm">
           숫자의 합이 <span className="font-bold text-neutral-900">10</span>이
           되도록 드래그!
         </p>
         <p className="text-neutral-500 text-xs">
           제한시간 90초 내에 최대한 많이 터뜨리세요
+        </p>
+        <p className="text-neutral-400 text-xs mt-2">
+          무료로 즐기는 사과게임, 두더지게임
         </p>
       </div>
 
