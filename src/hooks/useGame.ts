@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import type { Cell, GameState } from "../types/game";
+import type { Cell, GameState, GameStep, GameSession } from "../types/game";
 import {
   generateBoard,
   getCellsInBox,
@@ -9,6 +9,7 @@ import {
   GAME_TIME,
   TOTAL_CELLS,
 } from "../utils/gameLogic";
+import { startGameSession } from "../utils/supabase";
 
 export function useGame() {
   const [gameState, setGameState] = useState<GameState>("start");
@@ -17,23 +18,65 @@ export function useGame() {
   const [timeLeft, setTimeLeft] = useState(GAME_TIME);
   const [selectedCells, setSelectedCells] = useState<Cell[]>([]);
   const [clearTime, setClearTime] = useState<number | null>(null);
+  const [isStarting, setIsStarting] = useState(false);
+
   const timerRef = useRef<number | null>(null);
   const startTimeRef = useRef<number>(0);
 
+  // 세션 정보
+  const sessionRef = useRef<GameSession | null>(null);
+  const stepsRef = useRef<GameStep[]>([]);
+  const resetIndexRef = useRef<number>(0);
+
   // 게임 시작
-  const startGame = useCallback(() => {
-    setCells(generateBoard());
-    setScore(0);
-    setTimeLeft(GAME_TIME);
-    setSelectedCells([]);
-    setClearTime(null);
-    setGameState("playing");
-    startTimeRef.current = Date.now();
+  const startGame = useCallback(async () => {
+    setIsStarting(true);
+
+    try {
+      // 서버에서 세션 생성
+      const session = await startGameSession();
+
+      if (!session) {
+        console.error("Failed to create game session");
+        setIsStarting(false);
+        return;
+      }
+
+      // 세션 정보 저장
+      sessionRef.current = session;
+      stepsRef.current = [];
+      resetIndexRef.current = 0;
+
+      // seeded random으로 보드 생성
+      setCells(generateBoard(session.masterSeed, 0));
+      setScore(0);
+      setTimeLeft(GAME_TIME);
+      setSelectedCells([]);
+      setClearTime(null);
+      setGameState("playing");
+      startTimeRef.current = Date.now();
+    } catch (error) {
+      console.error("Error starting game:", error);
+    } finally {
+      setIsStarting(false);
+    }
   }, []);
 
-  // 게임판 리셋 (진행 중)
+  // 게임판 리셋 (진행 중) - 수동 리셋은 steps에 기록하지 않음
   const resetBoard = useCallback(() => {
-    setCells(generateBoard());
+    if (!sessionRef.current) return;
+
+    resetIndexRef.current += 1;
+
+    // 리셋 step 기록
+    const elapsed = Date.now() - startTimeRef.current;
+    stepsRef.current.push({
+      type: "reset",
+      resetIndex: resetIndexRef.current,
+      time: elapsed,
+    });
+
+    setCells(generateBoard(sessionRef.current.masterSeed, resetIndexRef.current));
     setSelectedCells([]);
   }, []);
 
@@ -51,11 +94,38 @@ export function useGame() {
     setSelectedCells([]);
   }, []);
 
+  // 현재 선택 영역 계산 (step 기록용)
+  const getSelectionBox = useCallback((): [number, number, number, number] | null => {
+    if (selectedCells.length === 0) return null;
+
+    const cols = selectedCells.map((c) => c.col);
+    const rows = selectedCells.map((c) => c.row);
+
+    return [
+      Math.min(...cols),
+      Math.max(...cols),
+      Math.min(...rows),
+      Math.max(...rows),
+    ];
+  }, [selectedCells]);
+
   // 터뜨리기 시도
   const tryPop = useCallback(() => {
     const sum = calculateSum(selectedCells);
 
     if (sum === 10 && selectedCells.length > 0) {
+      // step 기록
+      const box = getSelectionBox();
+      if (box) {
+        const elapsed = Date.now() - startTimeRef.current;
+        stepsRef.current.push({
+          type: "pop",
+          box,
+          resetIndex: resetIndexRef.current,
+          time: elapsed,
+        });
+      }
+
       // 터뜨리기 성공
       const poppedIds = new Set(selectedCells.map((c) => c.id));
       const newCells = cells.map((cell) =>
@@ -82,7 +152,21 @@ export function useGame() {
       setTimeout(() => {
         if (!hasValidCombination(newCells)) {
           // 자동 리셋
-          setCells(generateBoard());
+          if (!sessionRef.current) return;
+
+          resetIndexRef.current += 1;
+
+          // 리셋 step 기록
+          const elapsed = Date.now() - startTimeRef.current;
+          stepsRef.current.push({
+            type: "reset",
+            resetIndex: resetIndexRef.current,
+            time: elapsed,
+          });
+
+          setCells(
+            generateBoard(sessionRef.current.masterSeed, resetIndexRef.current)
+          );
         }
       }, 300);
 
@@ -91,7 +175,7 @@ export function useGame() {
 
     setSelectedCells([]);
     return false;
-  }, [selectedCells, cells]);
+  }, [selectedCells, cells, getSelectionBox]);
 
   // 타이머
   useEffect(() => {
@@ -117,6 +201,16 @@ export function useGame() {
     };
   }, [gameState]);
 
+  // 현재 게임 데이터 가져오기 (점수 제출용)
+  const getGameData = useCallback(() => {
+    return {
+      sessionId: sessionRef.current?.sessionId || null,
+      steps: [...stepsRef.current],
+      score,
+      clearTime,
+    };
+  }, [score, clearTime]);
+
   return {
     gameState,
     cells,
@@ -125,10 +219,12 @@ export function useGame() {
     selectedCells,
     clearTime,
     maxScore: TOTAL_CELLS,
+    isStarting,
     startGame,
     resetBoard,
     selectCells,
     clearSelection,
     tryPop,
+    getGameData,
   };
 }

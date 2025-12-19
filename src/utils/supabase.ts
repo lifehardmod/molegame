@@ -1,90 +1,137 @@
 import { createClient } from "@supabase/supabase-js";
-import type { Score } from "../types/game";
+import type { Score, GameStep, GameSession } from "../types/game";
 
 // Supabase 설정 (환경 변수 또는 기본값)
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "";
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || "";
 
-// Supabase 클라이언트 생성 (설정이 없으면 null)
+// Edge Function URL
+const edgeFunctionUrl = supabaseUrl
+  ? `${supabaseUrl}/functions/v1`
+  : "";
+
+// Supabase 클라이언트 생성 (읽기 전용 작업에 사용)
 export const supabase =
   supabaseUrl && supabaseAnonKey
     ? createClient(supabaseUrl, supabaseAnonKey)
     : null;
 
+// ============================================
+// Edge Function 호출 (보안 API)
+// ============================================
+
+// 게임 세션 시작
+export async function startGameSession(): Promise<GameSession | null> {
+  if (!edgeFunctionUrl || !supabaseAnonKey) {
+    console.log("Supabase not configured");
+    return null;
+  }
+
+  try {
+    const response = await fetch(`${edgeFunctionUrl}/start-game`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${supabaseAnonKey}`,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      console.error("Failed to start game:", error);
+      return null;
+    }
+
+    const data = await response.json();
+    return {
+      sessionId: data.session_id,
+      masterSeed: data.master_seed,
+    };
+  } catch (error) {
+    console.error("Error starting game session:", error);
+    return null;
+  }
+}
+
 // 점수 저장 결과 타입
 export interface SaveScoreResult {
   score: Score | null;
-  isNewRecord: boolean; // 기록 갱신 여부
-  previousScore: number | null; // 이전 점수
+  isNewRecord: boolean;
+  previousScore: number | null;
+  rank: number | null;
+  totalPlayers: number;
 }
 
-// 점수 저장 (같은 닉네임이면 높은 점수로 업데이트)
-export async function saveScore(
+// 점수 제출 (Edge Function을 통해 검증 후 저장)
+export async function submitScore(
+  sessionId: string,
   nickname: string,
-  score: number,
+  steps: GameStep[],
+  claimedScore: number,
   clearTime: number | null
 ): Promise<SaveScoreResult> {
-  if (!supabase) {
+  if (!edgeFunctionUrl || !supabaseAnonKey) {
     console.log("Supabase not configured, score not saved");
-    return { score: null, isNewRecord: false, previousScore: null };
+    return {
+      score: null,
+      isNewRecord: false,
+      previousScore: null,
+      rank: null,
+      totalPlayers: 0,
+    };
   }
 
-  // 기존 닉네임 기록 조회
-  const { data: existingData } = await supabase
-    .from("scores")
-    .select("*")
-    .eq("nickname", nickname)
-    .single();
+  try {
+    const response = await fetch(`${edgeFunctionUrl}/submit-score`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${supabaseAnonKey}`,
+      },
+      body: JSON.stringify({
+        session_id: sessionId,
+        nickname,
+        steps,
+        claimed_score: claimedScore,
+        clear_time: clearTime,
+      }),
+    });
 
-  // 기존 기록이 있는 경우
-  if (existingData) {
-    const previousScore = existingData.score;
+    const data = await response.json();
 
-    // 새 점수가 더 높으면 업데이트
-    if (score > existingData.score) {
-      const { data, error } = await supabase
-        .from("scores")
-        .update({
-          score,
-          clear_time: clearTime,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("nickname", nickname)
-        .select()
-        .single();
-
-      if (error) {
-        console.error("Error updating score:", error);
-        return { score: null, isNewRecord: false, previousScore };
-      }
-
-      return { score: data, isNewRecord: true, previousScore };
+    if (!response.ok) {
+      console.error("Failed to submit score:", data.error);
+      return {
+        score: null,
+        isNewRecord: false,
+        previousScore: null,
+        rank: null,
+        totalPlayers: 0,
+      };
     }
 
-    // 점수가 같거나 낮으면 기존 기록 유지
-    return { score: existingData, isNewRecord: false, previousScore };
+    return {
+      score: data.score,
+      isNewRecord: data.isNewRecord,
+      previousScore: data.previousScore,
+      rank: data.rank,
+      totalPlayers: data.totalPlayers,
+    };
+  } catch (error) {
+    console.error("Error submitting score:", error);
+    return {
+      score: null,
+      isNewRecord: false,
+      previousScore: null,
+      rank: null,
+      totalPlayers: 0,
+    };
   }
-
-  // 신규 기록 생성
-  const { data, error } = await supabase
-    .from("scores")
-    .insert([
-      {
-        nickname,
-        score,
-        clear_time: clearTime,
-      },
-    ])
-    .select()
-    .single();
-
-  if (error) {
-    console.error("Error saving score:", error);
-    return { score: null, isNewRecord: false, previousScore: null };
-  }
-
-  return { score: data, isNewRecord: true, previousScore: null };
 }
+
+// ============================================
+// 읽기 전용 API (기존 유지)
+// ============================================
 
 // Top N 점수 가져오기
 export async function getTopScores(limit: number = 50): Promise<Score[]> {

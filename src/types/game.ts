@@ -27,3 +27,23 @@ export interface Score {
   clear_time: number | null;
   created_at: string;
 }
+
+// 게임 스텝 타입 (리플레이 검증용)
+export type GameStep =
+  | {
+      type: "pop";
+      box: [number, number, number, number]; // [startCol, endCol, startRow, endRow]
+      resetIndex: number;
+      time: number;
+    }
+  | {
+      type: "reset";
+      resetIndex: number;
+      time: number;
+    };
+
+// 게임 세션 정보
+export interface GameSession {
+  sessionId: string;
+  masterSeed: number;
+}

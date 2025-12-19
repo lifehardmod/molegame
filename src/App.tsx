@@ -5,8 +5,9 @@ import { GameHUD } from "./components/GameHUD";
 import { StartScreen } from "./components/StartScreen";
 import { GameOverScreen } from "./components/GameOverScreen";
 import { Leaderboard } from "./components/Leaderboard";
-import { saveScore, getTopScores, getRank } from "./utils/supabase";
+import { submitScore, getTopScores } from "./utils/supabase";
 import type { Score } from "./types/game";
+import { Analytics } from "@vercel/analytics/react";
 
 type Screen = "start" | "game" | "gameover" | "leaderboard";
 
@@ -28,19 +29,21 @@ function App() {
     selectedCells,
     clearTime,
     maxScore,
+    isStarting,
     startGame,
     selectCells,
     clearSelection,
     tryPop,
+    getGameData,
   } = useGame();
 
   const handleStart = useCallback(
-    (name: string) => {
+    async (name: string) => {
       setNickname(name);
-      startGame();
-      setScreen("game");
       setIsNewRecord(false);
       setPreviousScore(null);
+      await startGame();
+      setScreen("game");
     },
     [startGame]
   );
@@ -52,16 +55,25 @@ function App() {
         setIsLoading(true);
 
         try {
-          const saveResult = await saveScore(nickname, score, clearTime);
-          setIsNewRecord(saveResult.isNewRecord);
-          setPreviousScore(saveResult.previousScore);
+          const gameData = getGameData();
 
-          const [rankData, scores] = await Promise.all([
-            getRank(score),
-            getTopScores(10),
-          ]);
-          setMyRank(rankData.rank);
-          setTotalPlayers(rankData.total);
+          if (gameData.sessionId) {
+            // Edge Function을 통해 검증 후 점수 저장
+            const result = await submitScore(
+              gameData.sessionId,
+              nickname,
+              gameData.steps,
+              gameData.score,
+              gameData.clearTime
+            );
+
+            setIsNewRecord(result.isNewRecord);
+            setPreviousScore(result.previousScore);
+            setMyRank(result.rank);
+            setTotalPlayers(result.totalPlayers);
+          }
+
+          const scores = await getTopScores(10);
           setTopScores(scores);
         } catch (error) {
           console.error("Error handling game over:", error);
@@ -71,13 +83,13 @@ function App() {
       };
       handleGameOver();
     }
-  }, [gameState, screen, nickname, score, clearTime]);
+  }, [gameState, screen, nickname, getGameData]);
 
-  const handleRestart = useCallback(() => {
-    startGame();
-    setScreen("game");
+  const handleRestart = useCallback(async () => {
     setIsNewRecord(false);
     setPreviousScore(null);
+    await startGame();
+    setScreen("game");
   }, [startGame]);
 
   const handleShowLeaderboard = async () => {
@@ -106,6 +118,7 @@ function App() {
             onStart={handleStart}
             onShowLeaderboard={handleShowLeaderboard}
             initialNickname={nickname}
+            isLoading={isStarting}
           />
         )}
 
@@ -159,6 +172,7 @@ function App() {
           />
         )}
       </div>
+      <Analytics />
     </div>
   );
 }

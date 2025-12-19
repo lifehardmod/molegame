@@ -1,12 +1,17 @@
 import type { Cell } from "../types/game";
+import { mulberry32 } from "./seededRandom";
 
 export const GRID_COLS = 10;
 export const GRID_ROWS = 18;
 export const TOTAL_CELLS = GRID_COLS * GRID_ROWS; // 180
 export const GAME_TIME = 90; // 90초
 
-// 게임판 생성 (1~9 랜덤)
-export function generateBoard(): Cell[] {
+// 게임판 생성 (seeded random 사용)
+export function generateBoard(masterSeed: number, resetIndex: number): Cell[] {
+  // masterSeed + resetIndex로 고유한 시드 생성
+  const combinedSeed = masterSeed + resetIndex * 1000000;
+  const random = mulberry32(combinedSeed);
+
   const cells: Cell[] = [];
   for (let row = 0; row < GRID_ROWS; row++) {
     for (let col = 0; col < GRID_COLS; col++) {
@@ -14,7 +19,7 @@ export function generateBoard(): Cell[] {
         id: `${row}-${col}`,
         row,
         col,
-        value: Math.floor(Math.random() * 9) + 1, // 1~9
+        value: Math.floor(random() * 9) + 1, // 1~9
         isPopped: false,
       });
     }
