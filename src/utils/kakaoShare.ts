@@ -45,20 +45,37 @@ export function initKakao(): boolean {
   if (typeof window !== "undefined" && window.Kakao) {
     if (!window.Kakao.isInitialized()) {
       window.Kakao.init(KAKAO_APP_KEY);
+      console.log("Kakao SDK initialized");
     }
-    return true;
+    return window.Kakao.isInitialized();
   }
   return false;
 }
 
 // 카카오톡 공유하기
-export function shareToKakao(score: number, rank: number | null): boolean {
-  if (!window.Kakao || !window.Kakao.isInitialized()) {
-    if (!initKakao()) {
-      // 카카오 SDK가 없으면 기본 공유 사용
+export function shareToKakao(score: number, rank: number | null): void {
+  // SDK 존재 확인
+  if (typeof window === "undefined" || !window.Kakao) {
+    console.warn("Kakao SDK not loaded");
+    shareViaNavigator(score, rank);
+    return;
+  }
+
+  // 초기화 안 되어있으면 초기화
+  if (!window.Kakao.isInitialized()) {
+    if (!KAKAO_APP_KEY) {
+      console.warn("Kakao App Key not configured");
       shareViaNavigator(score, rank);
-      return false;
+      return;
     }
+    window.Kakao.init(KAKAO_APP_KEY);
+  }
+
+  // 다시 확인
+  if (!window.Kakao.isInitialized()) {
+    console.warn("Kakao SDK initialization failed");
+    shareViaNavigator(score, rank);
+    return;
   }
 
   const description = rank
@@ -87,11 +104,9 @@ export function shareToKakao(score: number, rank: number | null): boolean {
         },
       ],
     });
-    return true;
   } catch (error) {
     console.error("Kakao share error:", error);
     shareViaNavigator(score, rank);
-    return false;
   }
 }
 
