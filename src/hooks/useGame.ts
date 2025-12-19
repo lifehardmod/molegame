@@ -22,7 +22,6 @@ export function useGame() {
   const [countdown, setCountdown] = useState<number>(0);
 
   const timerRef = useRef<number | null>(null);
-  const countdownRef = useRef<number | null>(null);
   const startTimeRef = useRef<number>(0);
 
   // 세션 정보
