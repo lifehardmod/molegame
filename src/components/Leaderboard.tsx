@@ -146,12 +146,6 @@ export function Leaderboard({ scores, isLoading, onClose }: LeaderboardProps) {
                     <span className="font-semibold text-neutral-900">
                       {s.score}
                     </span>
-                    {s.clear_time && (
-                      <span className="text-xs text-neutral-400 ml-1.5">
-                        {Math.floor(s.clear_time / 60)}:
-                        {String(s.clear_time % 60).padStart(2, "0")}
-                      </span>
-                    )}
                   </div>
                 </div>
               );

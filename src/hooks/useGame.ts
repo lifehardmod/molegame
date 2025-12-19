@@ -5,7 +5,6 @@ import {
   getCellsInBox,
   calculateSum,
   hasValidCombination,
-  getRemainingCount,
   GAME_TIME,
   TOTAL_CELLS,
 } from "../utils/gameLogic";
@@ -17,7 +16,6 @@ export function useGame() {
   const [score, setScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(GAME_TIME);
   const [selectedCells, setSelectedCells] = useState<Cell[]>([]);
-  const [clearTime, setClearTime] = useState<number | null>(null);
   const [isStarting, setIsStarting] = useState(false);
   const [countdown, setCountdown] = useState<number>(0);
 
@@ -53,7 +51,6 @@ export function useGame() {
       setScore(0);
       setTimeLeft(GAME_TIME);
       setSelectedCells([]);
-      setClearTime(null);
       
       // 카운트다운 시작
       setCountdown(3);
@@ -139,18 +136,6 @@ export function useGame() {
       setScore((prev) => prev + selectedCells.length);
       setSelectedCells([]);
 
-      // 전부 클리어 체크
-      const remaining = getRemainingCount(newCells);
-      if (remaining === 0) {
-        const elapsed = Math.floor((Date.now() - startTimeRef.current) / 1000);
-        setClearTime(elapsed);
-        if (timerRef.current) {
-          clearInterval(timerRef.current);
-        }
-        setGameState("gameover");
-        return true;
-      }
-
       // 조합 가능 여부 체크 (약간의 딜레이 후)
       setTimeout(() => {
         if (!hasValidCombination(newCells)) {
@@ -230,9 +215,8 @@ export function useGame() {
       sessionId: sessionRef.current?.sessionId || null,
       steps: [...stepsRef.current],
       score,
-      clearTime,
     };
-  }, [score, clearTime]);
+  }, [score]);
 
   return {
     gameState,
@@ -240,7 +224,6 @@ export function useGame() {
     score,
     timeLeft,
     selectedCells,
-    clearTime,
     maxScore: TOTAL_CELLS,
     isStarting,
     countdown,

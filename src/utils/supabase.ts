@@ -67,8 +67,7 @@ export async function submitScore(
   sessionId: string,
   nickname: string,
   steps: GameStep[],
-  claimedScore: number,
-  clearTime: number | null
+  claimedScore: number
 ): Promise<SaveScoreResult> {
   if (!edgeFunctionUrl || !supabaseAnonKey) {
     console.log("Supabase not configured, score not saved");
@@ -93,7 +92,7 @@ export async function submitScore(
         nickname,
         steps,
         claimed_score: claimedScore,
-        clear_time: clearTime,
+        clear_time: null,
       }),
     });
 
@@ -144,7 +143,6 @@ export async function getTopScores(limit: number = 50): Promise<Score[]> {
     .from("scores")
     .select("*")
     .order("score", { ascending: false })
-    .order("clear_time", { ascending: true, nullsFirst: false })
     .limit(limit);
 
   if (error) {

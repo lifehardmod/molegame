@@ -1,10 +1,8 @@
-import { formatTime } from "../utils/gameLogic";
 import { shareToKakao } from "../utils/kakaoShare";
 
 interface GameOverScreenProps {
   score: number;
   maxScore: number;
-  clearTime: number | null;
   myRank: number | null;
   totalPlayers: number;
   onRestart: () => void;
@@ -18,7 +16,6 @@ interface GameOverScreenProps {
 export function GameOverScreen({
   score,
   maxScore,
-  clearTime,
   myRank,
   totalPlayers,
   onRestart,
@@ -41,11 +38,6 @@ export function GameOverScreen({
             <h2 className="text-2xl font-bold text-neutral-900">
               {isPerfect ? "퍼펙트!" : "게임 종료"}
             </h2>
-            {clearTime && (
-              <p className="text-neutral-500 text-sm mt-1">
-                클리어 시간: {formatTime(clearTime)}
-              </p>
-            )}
           </div>
 
           {/* 기록 갱신 알림 */}

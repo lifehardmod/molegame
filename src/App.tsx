@@ -27,7 +27,6 @@ function App() {
     score,
     timeLeft,
     selectedCells,
-    clearTime,
     maxScore,
     isStarting,
     countdown,
@@ -64,8 +63,7 @@ function App() {
               gameData.sessionId,
               nickname,
               gameData.steps,
-              gameData.score,
-              gameData.clearTime
+              gameData.score
             );
 
             setIsNewRecord(result.isNewRecord);
@@ -168,7 +166,6 @@ function App() {
           <GameOverScreen
             score={score}
             maxScore={maxScore}
-            clearTime={clearTime}
             myRank={myRank}
             totalPlayers={totalPlayers}
             onHome={() => setScreen("start")}
