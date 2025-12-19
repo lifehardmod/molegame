@@ -2,7 +2,7 @@ import type { Cell } from "../types/game";
 import { mulberry32 } from "./seededRandom";
 
 export const GRID_COLS = 10;
-export const GRID_ROWS = 18;
+export const GRID_ROWS = 15;
 export const TOTAL_CELLS = GRID_COLS * GRID_ROWS; // 180
 export const GAME_TIME = 90; // 90초
 
