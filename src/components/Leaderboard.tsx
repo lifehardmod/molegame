@@ -52,9 +52,9 @@ export function Leaderboard({ scores, isLoading, onClose }: LeaderboardProps) {
   const showLoading = isLoading || isSearching;
 
   return (
-    <div className="flex-1 flex flex-col p-6 bg-white">
+    <div className="flex-1 flex flex-col bg-white overflow-hidden">
       {/* 헤더 */}
-      <div className="text-center mb-4">
+      <div className="text-center p-6 pb-0 mb-4">
         <h2 className="text-2xl font-bold text-neutral-900">🏆 랭킹</h2>
         <p className="text-sm text-neutral-400">
           {searchQuery.trim() ? "검색 결과" : "TOP 50"}
@@ -62,7 +62,7 @@ export function Leaderboard({ scores, isLoading, onClose }: LeaderboardProps) {
       </div>
 
       {/* 검색 */}
-      <div className="mb-4">
+      <div className="px-6 mb-4">
         <input
           type="text"
           value={searchQuery}
@@ -81,7 +81,7 @@ export function Leaderboard({ scores, isLoading, onClose }: LeaderboardProps) {
       </div>
 
       {/* 리스트 */}
-      <div className="flex-1 overflow-y-auto -mx-2 px-2">
+      <div className="flex-1 overflow-y-auto px-6 pb-24">
         {showLoading ? (
           <div className="space-y-1.5">
             {[...Array(8)].map((_, i) => (
@@ -102,9 +102,7 @@ export function Leaderboard({ scores, isLoading, onClose }: LeaderboardProps) {
           </div>
         ) : displayScores.length === 0 ? (
           <div className="text-center py-12 text-neutral-400">
-            {searchQuery.trim()
-              ? "검색 결과가 없어요"
-              : "아직 기록이 없어요!"}
+            {searchQuery.trim() ? "검색 결과가 없어요" : "아직 기록이 없어요!"}
           </div>
         ) : (
           <div className="space-y-1.5">
@@ -162,8 +160,8 @@ export function Leaderboard({ scores, isLoading, onClose }: LeaderboardProps) {
         )}
       </div>
 
-      {/* 닫기 버튼 */}
-      <div className="mt-4 pt-4 border-t border-neutral-100">
+      {/* 닫기 버튼 - 화면 하단 고정 */}
+      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] p-6 pt-4 bg-white border-t border-neutral-100">
         <button
           onClick={onClose}
           className="w-full py-3.5 rounded-xl font-semibold text-white text-sm
